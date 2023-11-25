@@ -1,3 +1,4 @@
+import subprocess
 from openai import OpenAI
 
 client = OpenAI()
@@ -26,12 +27,21 @@ def generate_code():
 def main():
   while True:
     code = generate_code()
+    messages.append({"role": "chatgpt", "content": code})
     
     print(f"Generated the following code:\n{code}\n")
     
     choice = input("Run this code? (y/n): ")
     if choice.lower() == 'y':
-      exec(code)
+      proc = subprocess.run(['ls', '-l'], 
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    universal_newlines=True)
+
+      messages.append({"role": "system", "content": proc.stdout + proc.stderr})
+    else:
+      messages.append({"role": "system", "content": "user refused to run the code"})
+
 
 if __name__ == "__main__":
     main()
