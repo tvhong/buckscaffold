@@ -38,12 +38,21 @@ def chat():
   prompt = input("> ")    
   add_message(ROLE_USER, prompt)
 
-  response = client.chat.completions.create(
+  print(f"{Fore.LIGHTRED_EX}assistant: ")
+  response = ""
+  for chunk in client.chat.completions.create(
     model="gpt-4",
-    messages=messages
-  )
+    messages=messages,
+    stream=True,
+  ):
+    content = chunk.choices[0].delta.content
+    if content is not None:
+      print(content, end='')
+      response += content
 
-  return response.choices[0].message.content.strip()
+  print(f"{Fore.WHITE}")
+
+  return response
 
 
 def extract_code(text):
@@ -61,7 +70,6 @@ def main():
   set_context()
   while True:
     response = chat()
-    print(f"{Fore.LIGHTRED_EX}assistant: {response}{Fore.WHITE}")
 
     messages.append({"role": ROLE_ASSISTANT, "content": response})
     
