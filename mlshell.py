@@ -1,3 +1,4 @@
+from colorama import Fore
 import re
 import subprocess
 from openai import OpenAI
@@ -34,7 +35,7 @@ Give a oneline bash commmand on macOS for the following queries and add the bash
 
 
 def generate_code():
-  prompt = input("Enter a code prompt: ")    
+  prompt = input(">")    
   add_message(ROLE_USER, prompt)
 
   response = client.chat.completions.create(
@@ -60,7 +61,7 @@ def main():
   set_context()
   while True:
     response = generate_code()
-    print(f"assistant: {response}")
+    print(f"{Fore.LIGHTRED_EX}assistant: {response}{Fore.WHITE}")
 
     messages.append({"role": ROLE_ASSISTANT, "content": response})
     
@@ -74,7 +75,7 @@ def main():
                       stderr=subprocess.PIPE,
                       universal_newlines=True)
 
-        msg = f"<stdout>{proc.stdout}</stdout>\n<stderr>{proc.stderr}</stderr>"
+        msg = f"user: {Fore.LIGHTGREEN_EX}<stdout>{proc.stdout}</stdout>\n<stderr>{proc.stderr}</stderr>{Fore.WHITE}"
         print(msg)
         add_message(ROLE_USER, msg)
       else:
