@@ -57,7 +57,7 @@ def main():
     
     choice = input("Run this code? (y/n): ")
     if choice.lower() == 'y':
-      proc = subprocess.run(code, 
+      proc = subprocess.run(code.split(" "), 
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     universal_newlines=True)
