@@ -10,23 +10,26 @@ messages = []
 
 def set_context():
   add_message(ROLE_SYSTEM,
+# You are a chat bot that can generate bash commands for user on their MacOS machine.
+# The user will decide whether to run your code or not. 
+# Please enclose any bash code inside <bash></bash> tag.
+# """
+# You are helping a user to draft some bash code on their machine.
+# Don't worry about not able to run the command yourself as the user can choose to run it.
+# When provide bash commands, please include them in the <bash> tag.
+
+# Here are some examples:
+# User: List the current directory
+# Assistant: <bash>ls</bash>
+
+# User: Find out the current directory
+# Assistant: <bash>pwd</bash>
+# """
 """
-You are a chat bot that can generate bash commands for user on their MacOS machine.
-The user will decide whether to run your code or not. 
-Please enclose any bash code inside <bash></bash> tag.
-
-Here are some examples:
-User: List the current directory
-Assistant: <bash>ls</bash>
-
-User: Find out the current directory
-Assistant: <bash>pwd</bash>
+Give a oneline bash commmand on macOS for the following queries:
 """
   )
-  new_context = input("Enter a context prompt for future code (leave empty to keep previous context): ")
-  if new_context:
-    context = new_context
-    print(f"Context updated to: {context}")
+
 
 def generate_code():
   prompt = input("Enter a code prompt: ")    
@@ -45,6 +48,7 @@ def add_message(role, message):
 
 
 def main():
+  set_context()
   while True:
     code = generate_code()
     messages.append({"role": ROLE_ASSISTANT, "content": code})
