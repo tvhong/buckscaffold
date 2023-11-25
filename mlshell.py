@@ -1,15 +1,37 @@
-print("asf")
 from openai import OpenAI
-print("HI")
 
 client = OpenAI()
 
-completion = client.chat.completions.create(
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
-    {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
-  ]
-)
+messages = []
+# context = ""
 
-print(completion.choices[0].message)
+# def set_context():
+#   global context
+#   new_context = input("Enter a context prompt for future code (leave empty to keep previous context): ")
+#   if new_context:
+#     context = new_context
+#     print(f"Context updated to: {context}")
+
+def generate_code():
+  prompt = input("Enter a code prompt: ")    
+  messages.append({"role": "user", "content": prompt})
+
+  response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=messages
+  )
+
+  return response.choices[0].message
+
+def main():
+  while True:
+    code = generate_code()
+    
+    print(f"Generated the following code:\n{code}\n")
+    
+    choice = input("Run this code? (y/n): ")
+    if choice.lower() == 'y':
+      exec(code)
+
+if __name__ == "__main__":
+    main()
