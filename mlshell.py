@@ -34,8 +34,8 @@ Give a oneline bash commmand on macOS for the following queries and add the bash
   )
 
 
-def generate_code():
-  prompt = input(">")    
+def chat():
+  prompt = input("> ")    
   add_message(ROLE_USER, prompt)
 
   response = client.chat.completions.create(
@@ -60,15 +60,15 @@ def add_message(role, message):
 def main():
   set_context()
   while True:
-    response = generate_code()
+    response = chat()
     print(f"{Fore.LIGHTRED_EX}assistant: {response}{Fore.WHITE}")
 
     messages.append({"role": ROLE_ASSISTANT, "content": response})
     
     code = extract_code(response)
     if code:
-      choice = input(f"(enter to run `{code}`)>")
-      if choice.lower() == '':
+      choice = input(f"run `{code}` (y/n)? > ")
+      if choice.lower() == 'y':
         proc = subprocess.run(code, 
                       shell=True,
                       stdout=subprocess.PIPE,
