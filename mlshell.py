@@ -40,7 +40,7 @@ def generate_code():
     messages=messages
   )
 
-  return response.choices[0].message.content
+  return response.choices[0].message.content.strip()
 
 
 def add_message(role, message):
@@ -53,16 +53,18 @@ def main():
     code = generate_code()
     messages.append({"role": ROLE_ASSISTANT, "content": code})
     
-    print(f"Generated the following code:\n{code}\n")
+    print(f"Model code:\n{code}\n")
     
     choice = input("Run this code? (y/n): ")
     if choice.lower() == 'y':
-      proc = subprocess.run(['ls', '-l'], 
+      proc = subprocess.run(code, 
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     universal_newlines=True)
 
-      add_message(ROLE_USER, "stdout: " + proc.stdout + "\nstderr: " + proc.stderr)
+      msg = "stdout: " + proc.stdout + "\nstderr: " + proc.stderr
+      print(msg)
+      add_message(ROLE_USER, msg)
     else:
       add_message(ROLE_USER, "I won't run this code.")
 
