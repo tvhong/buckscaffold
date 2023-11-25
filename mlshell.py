@@ -1,33 +1,53 @@
 import subprocess
 from openai import OpenAI
 
+ROLE_USER = "user"
+ROLE_ASSISTANT = "assistant"
+ROLE_SYSTEM = "system"
+
 client = OpenAI()
-
 messages = []
-# context = ""
 
-# def set_context():
-#   global context
-#   new_context = input("Enter a context prompt for future code (leave empty to keep previous context): ")
-#   if new_context:
-#     context = new_context
-#     print(f"Context updated to: {context}")
+def set_context():
+  add_message(ROLE_SYSTEM,
+"""
+You are a chat bot that can generate bash commands for user on their MacOS machine.
+The user will decide whether to run your code or not. 
+Please enclose any bash code inside <bash></bash> tag.
+
+Here are some examples:
+User: List the current directory
+Assistant: <bash>ls</bash>
+
+User: Find out the current directory
+Assistant: <bash>pwd</bash>
+"""
+  )
+  new_context = input("Enter a context prompt for future code (leave empty to keep previous context): ")
+  if new_context:
+    context = new_context
+    print(f"Context updated to: {context}")
 
 def generate_code():
   prompt = input("Enter a code prompt: ")    
-  messages.append({"role": "user", "content": prompt})
+  add_message(ROLE_USER, prompt)
 
   response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model="gpt-4",
     messages=messages
   )
 
-  return response.choices[0].message
+  return response.choices[0].message.content
+
+
+def add_message(role, message):
+  messages.append({"role": role, "content": message})
+
 
 def main():
   while True:
     code = generate_code()
-    messages.append({"role": "chatgpt", "content": code})
+    messages.append({"role": ROLE_ASSISTANT, "content": code})
     
     print(f"Generated the following code:\n{code}\n")
     
@@ -38,10 +58,9 @@ def main():
                     stderr=subprocess.PIPE,
                     universal_newlines=True)
 
-      messages.append({"role": "system", "content": proc.stdout + proc.stderr})
+      add_message(ROLE_USER, "stdout: " + proc.stdout + "\nstderr: " + proc.stderr)
     else:
-      messages.append({"role": "system", "content": "user refused to run the code"})
-
+      add_message(ROLE_USER, "I won't run this code.")
 
 if __name__ == "__main__":
     main()
