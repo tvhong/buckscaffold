@@ -1,9 +1,11 @@
+import re
 import subprocess
 from openai import OpenAI
 
 ROLE_USER = "user"
 ROLE_ASSISTANT = "assistant"
 ROLE_SYSTEM = "system"
+CODE_REGEX = re.compile(r"<bash>(.*)</bash>")
 
 client = OpenAI()
 messages = []
@@ -26,7 +28,7 @@ def set_context():
 # Assistant: <bash>pwd</bash>
 # """
 """
-Give a oneline bash commmand on macOS for the following queries:
+Give a oneline bash commmand on macOS for the following queries and add the bash command inside <bash> tag:
 """
   )
 
@@ -43,6 +45,13 @@ def generate_code():
   return response.choices[0].message.content.strip()
 
 
+def extract_code(text):
+  match = CODE_REGEX.search(text)
+  if match:
+    return match.group(1)
+  return ""
+
+
 def add_message(role, message):
   messages.append({"role": role, "content": message})
 
@@ -50,24 +59,26 @@ def add_message(role, message):
 def main():
   set_context()
   while True:
-    code = generate_code()
-    messages.append({"role": ROLE_ASSISTANT, "content": code})
-    
-    print(f"Model code:\n{code}\n")
-    
-    choice = input("Run this code? (y/n): ")
-    if choice.lower() == 'y':
-      proc = subprocess.run(code, 
-                    shell=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    universal_newlines=True)
+    response = generate_code()
+    print(f"assistant: {response}")
 
-      msg = "===stdout===\n" + proc.stdout + "\n===stderr===\n" + proc.stderr
-      print(msg)
-      add_message(ROLE_USER, msg)
-    else:
-      add_message(ROLE_USER, "I won't run this code.")
+    messages.append({"role": ROLE_ASSISTANT, "content": response})
+    
+    code = extract_code(response)
+    if code:
+      choice = input(f"(enter to run `{code}`)>")
+      if choice.lower() == '':
+        proc = subprocess.run(code, 
+                      shell=True,
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      universal_newlines=True)
+
+        msg = f"<stdout>{proc.stdout}</stdout>\n<stderr>{proc.stderr}</stderr>"
+        print(msg)
+        add_message(ROLE_USER, msg)
+      else:
+        add_message(ROLE_USER, "I won't run this code.")
 
 if __name__ == "__main__":
     main()
