@@ -57,12 +57,13 @@ def main():
     
     choice = input("Run this code? (y/n): ")
     if choice.lower() == 'y':
-      proc = subprocess.run(code.split(" "), 
+      proc = subprocess.run(code, 
+                    shell=True,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     universal_newlines=True)
 
-      msg = "stdout: " + proc.stdout + "\nstderr: " + proc.stderr
+      msg = "===stdout===\n" + proc.stdout + "\n===stderr===\n" + proc.stderr
       print(msg)
       add_message(ROLE_USER, msg)
     else:
